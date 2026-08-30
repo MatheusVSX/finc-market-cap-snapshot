@@ -1,0 +1,35 @@
+name: Publica snapshot de market cap
+
+on:
+  schedule:
+    # Toda segunda-feira, 09:00 UTC (06:00 America/Sao_Paulo) — semanal,
+    # capitalização de mercado não precisa de cadência mais curta.
+    - cron: "0 9 * * 1"
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Gera market_caps.json
+        env:
+          FMP_API_KEY: ${{ secrets.FMP_API_KEY }}
+        run: python scripts/generate_snapshot.py
+
+      - name: Publica (commit + push)
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add market_caps.json
+          git diff --cached --quiet && echo "sem mudança, nada pra commitar" && exit 0
+          git commit -m "snapshot semanal automático"
+          git push
