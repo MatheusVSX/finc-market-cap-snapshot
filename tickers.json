@@ -1,3 +1,7 @@
 {
-  "tickers": []
+  "tickers": [
+    "AAPL",
+    "AMZN",
+    "NVDA"
+  ]
 }
